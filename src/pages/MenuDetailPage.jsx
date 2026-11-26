@@ -1,0 +1,43 @@
+import { Link, useParams } from "react-router";
+import useFetch from "../hooks/useFetch.js";
+import { useCartStore } from "../stores/cartStore.js";
+import Button from "../components/Button.jsx";
+
+// 메뉴 하나(/menu/:id) — 주소의 :id로 어떤 메뉴인지 찾습니다
+function MenuDetailPage() {
+  const { id } = useParams(); // 주소에서 꺼낸 값은 문자열 — "2"
+  const { data: menus, error, loading } = useFetch("/menus.json");
+  const addToCart = useCartStore((state) => state.addToCart);
+
+  if (loading) return <p className="text-stone-500">메뉴를 불러오는 중…</p>;
+  if (error) return <p className="text-sm text-red-600">불러오지 못했습니다 — {error.message}</p>;
+  const menu = menus.find((item) => item.id === Number(id));
+
+  if (!menu) {
+    return (
+      <section>
+        <h2 className="mb-4 text-xl font-bold">{id}번 메뉴는 없습니다</h2>
+        <Link to="/" className="text-sm text-stone-600 hover:underline">
+          메뉴로
+        </Link>
+      </section>
+    );
+  }
+
+  return (
+    <article className="max-w-md rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
+      <p className="text-sm text-stone-500">{menu.category}</p>
+      <h2 className="mt-1 text-2xl font-bold">{menu.name}</h2>
+      <p className="mt-1 text-lg font-bold text-amber-800">{menu.price}원</p>
+      <p className="mt-3 text-stone-600">{menu.desc}</p>
+      <div className="mt-6 flex items-center gap-3">
+        <Button onClick={() => addToCart(menu)}>담기</Button>
+        <Link to="/" className="text-sm text-stone-600 hover:underline">
+          메뉴로
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+export default MenuDetailPage;
